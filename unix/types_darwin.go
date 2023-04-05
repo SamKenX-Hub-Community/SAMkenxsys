@@ -140,6 +140,8 @@ type Fsid C.struct_fsid
 
 type Dirent C.struct_dirent
 
+type Attrlist C.struct_attrlist
+
 // File system limits
 
 const (
@@ -304,6 +306,7 @@ const (
 	AT_REMOVEDIR        = C.AT_REMOVEDIR
 	AT_SYMLINK_FOLLOW   = C.AT_SYMLINK_FOLLOW
 	AT_SYMLINK_NOFOLLOW = C.AT_SYMLINK_NOFOLLOW
+	AT_EACCESS          = C.AT_EACCESS
 )
 
 // poll
