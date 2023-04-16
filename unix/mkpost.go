@@ -24,7 +24,10 @@ import (
 
 func main() {
 	// Get the OS and architecture (using GOARCH_TARGET if it exists)
-	goos := os.Getenv("GOOS")
+	goos := os.Getenv("GOOS_TARGET")
+	if goos == "" {
+		goos = os.Getenv("GOOS")
+	}
 	goarch := os.Getenv("GOARCH_TARGET")
 	if goarch == "" {
 		goarch = os.Getenv("GOARCH")
@@ -96,6 +99,17 @@ func main() {
 		b = ptraceIoDescStruct.ReplaceAllFunc(b, func(in []byte) []byte {
 			return addrField.ReplaceAll(in, []byte(`${1}uintptr`))
 		})
+	}
+
+	if goos == "solaris" {
+		// Convert *int8 to *byte in Iovec.Base like on every other platform.
+		convertIovecBase := regexp.MustCompile(`Base\s+\*int8`)
+		iovecType := regexp.MustCompile(`type Iovec struct {[^}]*}`)
+		iovecStructs := iovecType.FindAll(b, -1)
+		for _, s := range iovecStructs {
+			newNames := convertIovecBase.ReplaceAll(s, []byte("Base *byte"))
+			b = bytes.Replace(b, s, newNames, 1)
+		}
 	}
 
 	// Intentionally export __val fields in Fsid and Sigset_t
